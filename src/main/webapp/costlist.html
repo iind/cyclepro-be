@@ -1,0 +1,69 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Cost details</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.21/themes/redmond/jquery-ui.css" />
+    <link rel="stylesheet" type="text/css" href="styles/ui.jqgrid.css" />
+    <style type="text/css">
+        html, body { font-size: 75%; }
+    </style>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.21/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="http://www.ok-soft-gmbh.com/jqGrid/jquery.jqGrid-4.4.0/src/i18n/grid.locale-en.js"></script>
+    <script type="text/javascript">
+        $.jgrid.no_legacy_api = true;
+        $.jgrid.useJSON = true;
+    </script>
+    <script type="text/javascript" src="http://www.ok-soft-gmbh.com/jqGrid/jquery.jqGrid-4.4.0/js/jquery.jqGrid.src.js"></script>
+    <script type="text/javascript">
+    //<![CDATA[
+        /*global $ */
+        $(function () {
+            'use strict';
+            $("#jQGrid").html("<table id=\"list\"></table><div id=\"page\"></div>");
+            $("#list").jqGrid({
+                url: "http://localhost:8080/billapp/rest/api/cost/list",
+                datatype: "json",
+                height: "auto",
+                jsonReader: {
+                    root: function (obj) {
+                        return obj;
+                    },
+                    repeatitems: false
+                },
+                serializeGridData: function (postData) {
+                    return JSON.stringify(postData);
+                },
+                colNames: ['Id', 'Itemname', 'Contractor', 'Cost'],
+                colModel: [
+                    { name: 'costid', width: 100, sortable: true, sorttype: "int" },
+                    { name: 'itemName', width: 130, sortable: false },
+                    { name: 'contractorName', width: 100, sortable: false },
+                    { name: 'unitCost', width: 180, sortable: false }
+                ],
+				cmTemplate: {editable: true},
+                rowNum: 10,
+                rowList: [10, 30, 1000],
+                loadonce: true,
+                rownumbers: true,
+                gridview: true,
+                pager: "#pager",
+				ignoreCase: true,
+                sortname: 'invdate',
+                viewrecords: true,
+                sortorder: "desc",
+                caption: "Cost Details"
+            });
+			$("#list").jqGrid('navGrid', '#pager', { edit: true, add: true, del: true });
+        });
+    //]]>
+    </script>
+</head>
+<body>
+    <div id="jQGrid"></div>
+	<div id="pager"></div>
+</body>
+</html>

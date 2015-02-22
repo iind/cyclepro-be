@@ -1,0 +1,193 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Price Info</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.21/themes/redmond/jquery-ui.css" />
+    <link rel="stylesheet" type="text/css" href="styles/ui.jqgrid.css" />
+    <style type="text/css">
+        html, body { font-size: 75%; }
+    </style>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.21/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="http://www.ok-soft-gmbh.com/jqGrid/jquery.jqGrid-4.4.0/src/i18n/grid.locale-en.js"></script>
+    <script type="text/javascript">
+        $.jgrid.no_legacy_api = true;
+        $.jgrid.useJSON = true;
+    </script>
+    <!-- <script type="text/javascript" src="scripts/grid.js"></script> -->
+    <script type="text/javascript" src="http://www.ok-soft-gmbh.com/jqGrid/jquery.jqGrid-4.4.0/js/jquery.jqGrid.src.js"></script>
+    <script type="text/javascript">
+    //<![CDATA[
+        /*global $ */
+        $(function () {
+            'use strict';
+            var URL = "http://localhost:8080/billapp/rest/api";
+            $("#grid").jqGrid({
+                url: "http://localhost:8080/billapp/rest/api/prices/list",
+                datatype: "json",
+                height: "auto",
+                jsonReader: {
+                    root: function (obj) {
+                        return obj;
+                    },
+                    repeatitems: false
+                },
+                serializeGridData: function (postData) {
+                    return JSON.stringify(postData);
+                },
+                colNames: ['Id', 'Itemname', 'Customer', 'Price'],
+                colModel: [
+                    { name: 'priceId', width: 100,editoptions:{readonly:true,size:10}, sortable: true, sorttype: "int" },
+                    { name: 'itemName', id:'itemId',width: 130, sortable: false ,edittype:"select",
+                    editoptions:{value:"1:Replace Rear Wheel - Repair;2:071-1077;3:071-1201"}},
+                    { name: 'customerName', width: 100, sortable: false ,edittype:"select",
+                     editoptions:{value:"1:Atmosphere Saint Denis;2:Bnai Brith (Gatineau);3:CT - 009 Langelier"}},
+                    { name: 'unitPrice', width: 180, sortable: false }
+                ],
+                
+                /*colModel: [
+                    { name: 'priceId', width: 100,editoptions:{readonly:true,size:10}, sortable: true, sorttype: "int" },
+                    { name: 'itemName', id:'itemId',width: 130, sortable: false ,edittype:"select",
+                    editoptions:{
+                    
+                		dataUrl: 'http://localhost:8080/billapp/rest/api/item/list',
+               			buildSelect: function (data) {
+               				alert(JSON.stringify(escape(data)));
+                         //alert(JSON.stringify(data.replace(/\"/g, "")));
+                         if (escape(data) != null) {
+                 	        var strOutput="";
+				            var options =[];
+                 			$.each(escape(data), function(key, val) {
+                 				options.push(val.itemId+':'+val.itemName+';');
+                 
+  							});
+  				  			alert("before remove" + options.toString().replace(/,/g,''));
+  				 			strOutput = options.toString().replace(/,/g,'');
+  							 strOutput = strOutput.substring(0, strOutput.length - 1);
+  				 			alert("final" +strOutput);
+  				
+            				}
+                    		return strOutput;
+               		  }
+               		  }
+                    
+                    },
+                    { name: 'customerName', width: 100, sortable: false ,edittype:"select",
+                     editoptions:{value:"1:Atmosphere Saint Denis;2:Bnai Brith (Gatineau);3:CT - 009 Langelier"}},
+                    { name: 'unitPrice', width: 180, sortable: false }
+                ],*/
+                
+				cmTemplate: {editable: true},
+                rowNum: 10,
+                rowList: [10, 30, 1000],
+                loadonce: true,
+                rownumbers: true,
+                gridview: true,
+                pager: "#pager",
+				ignoreCase: true,
+                sortname: 'invdate',
+                viewrecords: true,
+                sortorder: "desc",
+                caption: "Price Details"
+            });
+            
+            function getItems(){
+            var options =[];
+            alert('inside get Items');
+        	$.getJSON("http://localhost:8080/billapp/rest/api/item/list", null, function(data) {
+            if (data != null) {
+                 //alert(JSON.stringify(data));
+                 //{"itemId":1,"itemName
+                 var strOutput="";
+                 $.each(data, function(key, val) {
+                 	options.push(val.itemId+':'+val.itemName+';');
+                 
+  				});
+  				  alert("before remove" + options.toString().replace(/,/g,''));
+  				 strOutput = options.toString().replace(/,/g,'');
+  				 strOutput = strOutput.substring(0, strOutput.length - 1);
+  				 alert("final" +strOutput);
+  				 options = JSON.parse(strOutput);
+            }
+        });
+        
+        
+    }
+            
+            $.extend($.jgrid.edit, {
+				closeAfterEdit: true,
+				reloadAfterSubmit:true,
+				ajaxEditOptions: { contentType: "application/json" },
+				serializeEditData: function(data) {
+				data.custId=data.customerName,
+    			data.itemId=data.itemName
+				    if(data.oper =='add')
+				    {
+				       //alert('add');
+				       delete data.id;
+				    }
+				    else{
+				        //alert('edit');
+				        data.id=data.priceId;
+				    }
+				    delete data.customerName;
+				    delete data.itemName;
+				    delete data.priceId;
+				    delete data.oper;
+					//alert('after remove final data>>>>>><<<<<<<' +JSON.stringify(data));
+					return JSON.stringify(data);
+				},
+				
+				afterSubmit:function(response,postdata)
+				{
+					$("#grid").jqGrid('setGridParam',{datatype:'json'}).trigger('reloadGrid');
+					return "";
+				}
+			});
+			
+			
+			$.extend($.jgrid.del, {
+				mtype: 'DELETE',
+				ajaxEditOptions: { contentType: "application/json" },
+				onclickSubmit: function(params, postdata) {
+				//alert('params data::::::::' +JSON.stringify(params) + "Post data " +JSON.stringify(postdata));
+				params.url = params.url + '/' + postdata;
+				//alert("after url append = " + params.url);
+		    },
+			serializeDelData: function(data) {
+				return "";
+			}
+		});
+			
+	$("#grid").jqGrid('navGrid', '#pager', { edit: true, add: true, del: true },
+    //edit options
+    { url: 'http://localhost:8080/billapp/rest/api/price/edit',mtype: 'POST' },
+    //add options
+    { url: 'http://localhost:8080/billapp/rest/api/price/create',mtype: 'POST' },
+    //delete options
+    { url: 'http://localhost:8080/billapp/rest/api/price/delete' }
+);
+
+
+
+		// Toolbar Search
+		//$("#grid").jqGrid('filterToolbar',{stringResult: true,searchOnEnter : true, defaultSearch:"cn"});
+				
+        });
+    //]]>
+    </script>
+ 
+</head>
+<body>
+    <!-- <div id="jqgrid"></div>
+	<div id="pager"></div> -->
+	
+	<div id="jqgrid">
+	<table id="grid"></table>
+	<div id="pager"></div>
+</div>
+</body>
+</html>
